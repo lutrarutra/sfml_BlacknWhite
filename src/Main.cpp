@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <string>
+#include <chrono>
 
 #include "Main.hpp"
 
@@ -108,7 +109,7 @@ int main()
 {
 	sf::Texture texture;
 
-	std::string imagePath = loadImage(texture);
+	const std::string imagePath = loadImage(texture);
 	int algorithmChosen = chooseAlgorithm();
 	bool save = askSave();
 
@@ -141,6 +142,9 @@ int main()
 	}
 
 	int grey = 0;
+
+	auto start = std::chrono::high_resolution_clock::now();
+
 	for (unsigned int i = 0; i < texture.getSize().x; ++i)
 	{
 		for (unsigned int j = 0; j < texture.getSize().y; ++j)
@@ -149,6 +153,10 @@ int main()
 			image.setPixel(i, j, sf::Color(grey, grey, grey));
 		}
 	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float> duration = end - start;
+	std::cout << "Converting image took: " << duration.count() << " seconds." << std::endl;
 
 	texture.update(image);
 
