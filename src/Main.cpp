@@ -79,6 +79,31 @@ bool askSave()
 	return option == 1;
 }
 
+int averageGrey(sf::Color const &pixel)
+{
+	return (pixel.r + pixel.g + pixel.b) / 3;
+}
+
+int correctedGrey(sf::Color const &pixel)
+{
+	return (pixel.r * 0.3f + pixel.g * 0.59f + pixel.b * 0.11f);
+}
+
+int desaturatedGrey(sf::Color const &pixel)
+{
+	return (std::max(std::max(pixel.r, pixel.g), pixel.b) + std::min(std::min(pixel.r, pixel.g), pixel.b)) / 2;
+}
+
+int decompositedMaxGrey(sf::Color const &pixel)
+{
+	return std::max(std::max(pixel.r, pixel.g), pixel.b);
+}
+
+int decompositedMinGrey(sf::Color const &pixel)
+{
+	return std::min(std::min(pixel.r, pixel.g), pixel.b);
+}
+
 int main()
 {
 	sf::Texture texture;
@@ -90,32 +115,37 @@ int main()
 	sf::Image image;
 	image = texture.copyToImage();
 
-	int grey = 0;
-	for (int i = 0; i < texture.getSize().x; ++i)
+	typedef int (*GreyScaleFunction)(sf::Color const &pixel);
+	GreyScaleFunction greyScaleFunc;
+
+	switch (algorithmChosen)
 	{
-		for (int j = 0; j < texture.getSize().y; ++j)
+	case 1:
+		greyScaleFunc = averageGrey;
+		break;
+	case 2:
+		greyScaleFunc = correctedGrey;
+		break;
+	case 3:
+		greyScaleFunc = desaturatedGrey;
+		break;
+	case 4:
+		greyScaleFunc = decompositedMaxGrey;
+		break;
+	case 5:
+		greyScaleFunc = decompositedMinGrey;
+		break;
+	default:
+		greyScaleFunc = averageGrey;
+		break;
+	}
+
+	int grey = 0;
+	for (unsigned int i = 0; i < texture.getSize().x; ++i)
+	{
+		for (unsigned int j = 0; j < texture.getSize().y; ++j)
 		{
-			switch (algorithmChosen)
-			{
-			case 1:
-				grey = (image.getPixel(i, j).r + image.getPixel(i, j).g + image.getPixel(i, j).b) / 3;
-				break;
-			case 2:
-				grey = (image.getPixel(i, j).r * 0.3f + image.getPixel(i, j).g * 0.59f + image.getPixel(i, j).b * 0.11f);
-				break;
-			case 3:
-				grey = (std::max(std::max(image.getPixel(i, j).r, image.getPixel(i, j).g), image.getPixel(i, j).b) + std::min(std::min(image.getPixel(i, j).r, image.getPixel(i, j).g), image.getPixel(i, j).b)) / 2;
-				break;
-			case 4:
-				grey = std::max(std::max(image.getPixel(i, j).r, image.getPixel(i, j).g), image.getPixel(i, j).b);
-				break;
-			case 5:
-				grey = std::min(std::min(image.getPixel(i, j).r, image.getPixel(i, j).g), image.getPixel(i, j).b);
-				break;
-			default:
-				grey = (image.getPixel(i, j).r + image.getPixel(i, j).g + image.getPixel(i, j).b) / 3;
-				break;
-			}
+			grey = greyScaleFunc(image.getPixel(i, j));
 			image.setPixel(i, j, sf::Color(grey, grey, grey));
 		}
 	}
