@@ -4,8 +4,6 @@
 #include <string>
 #include <chrono>
 
-#include "Main.hpp"
-
 std::string loadImage(sf::Texture &texture)
 {
 	bool imgLoaded = false;
